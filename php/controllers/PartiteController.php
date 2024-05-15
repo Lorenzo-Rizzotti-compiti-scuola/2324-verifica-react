@@ -8,8 +8,10 @@ class PartiteController
     sleep(1);
     $conn = new mysqli("my_mariadb_5b", "root", "ciccio", "indovina_numero");
     $id = substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil(10/strlen($x)) )),1,10);
+    $body = json_decode($request->getBody()->getContents(), true);
+    $nome = $body["nome"];
     $numero = rand(0, 100);
-    $raw_query = "INSERT INTO partita(id, numero, tentativi) VALUES('$id', $numero, 0)";
+    $raw_query = "INSERT INTO partita(id, numero, tentativi, nome) VALUES('$id', $numero, 0, '$nome')";
     $result = $conn->query($raw_query);
     $raw_query = "SELECT * FROM partita WHERE id ='$id'";
     $result = $conn->query($raw_query);
@@ -23,16 +25,13 @@ class PartiteController
     sleep(1);
     $conn = new mysqli("my_mariadb_5b", "root", "ciccio", "indovina_numero");
     $id = $args["id"];
-    $body = json_decode($request->getBody()->getContents(), true);    
+    $body = json_decode($request->getBody()->getContents(), true);
     $numero = $body["numero"];
 
     $raw_query = "SELECT * FROM partita WHERE id ='$id'";
     $result = $conn->query($raw_query);
     $results = $result->fetch_assoc();
     if($result->num_rows == 1){
-      $tentativi = $results["tentativi"] + 1 ;
-      $raw_query = "UPDATE partita SET tentativi = $tentativi WHERE id = '$id'";
-      $result = $conn->query($raw_query);
       if($numero < $results["numero"]){
         $risultato = -1;
       }else if($numero > $results["numero"]){
@@ -40,6 +39,10 @@ class PartiteController
       }else{
         $risultato = 0;
       }
+      $ended = $risultato == 0;
+      $tentativi = $results["tentativi"] + 1 ;
+      $raw_query = "UPDATE partita SET tentativi = $tentativi, ended = $ended WHERE id = '$id'";
+      $result = $conn->query($raw_query);
       $response->getBody()->write(json_encode(array("id" => $id, "risultato" => $risultato, "tentativi" => $tentativi)));
       return $response->withHeader("Content-type", "application/json")->withStatus(200);
     }else{
