@@ -3,7 +3,7 @@
 cd /app
 if [ ! -f package.json ]; then
   rm .gitkeep
-  npx -y create-react-app . 
+  bun create vite . --template react-ts
 fi
-npm install
-npm start
+bun install
+bun run dev --port 3000 --host

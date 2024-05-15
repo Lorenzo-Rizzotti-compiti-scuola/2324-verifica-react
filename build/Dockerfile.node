@@ -1,4 +1,4 @@
-FROM node
+FROM oven/bun:latest
 ARG UID
 ARG GID
 EXPOSE 3000
