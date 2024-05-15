@@ -94,6 +94,9 @@ function App() {
 
         setShowedResult(guessRequest.data.risultato);
         setTentativi(guessRequest.data.tentativi);
+        if (guessRequest.data.risultato == Risultato.Correct) {
+            setGameId(null);
+        }
 
         setIsLoading(false);
     }
