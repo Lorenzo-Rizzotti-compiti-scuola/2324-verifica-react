@@ -36,6 +36,7 @@ function App() {
     });
 
     const [gameId, setGameId] = useState<string | null>(null);
+    const [name, setName] = useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [userGuess, setUserGuess] = useState<number | undefined>(undefined);
     const [showedResult, setShowedResult] = useState<Risultato | null>(null);
@@ -55,9 +56,12 @@ function App() {
         }
     }
 
-    async function startGame() {
+    async function startGame(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         setIsLoading(true);
-        const startGameRequest = await axios.post<StartGameResponse>("/partita").catch(() => {
+        const startGameRequest = await axios.post<StartGameResponse>("/partita", {
+            nome: name
+        }).catch(() => {
             toast.error("C'è stato un errore durante l'avvio del gioco")
         });
 
@@ -98,12 +102,15 @@ function App() {
         <>
             {
                 !gameId ?
-                    <Button onClick={startGame} disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                        Avvia partita
-                    </Button> :
+                    <form onSubmit={startGame} className="flex max-w-sm items-center space-x-2">
+                        <Input required disabled={isLoading} placeholder="Nome" onChange={(event)=>{setName(event.target.value)}}/>
+                        <Button type="submit" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                            Avvia partita
+                        </Button>
+                    </form>:
                     <form onSubmit={submitNumber} className="flex max-w-sm items-center space-x-2">
-                        <Input disabled={isLoading} type="number" min={0} max={100} placeholder="Numero"
+                        <Input required disabled={isLoading} type="number" min={0} max={100} placeholder="Numero"
                                onChange={(event) => setUserGuess(Number(event.target.value))}/>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
